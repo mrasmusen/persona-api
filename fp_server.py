@@ -1,6 +1,8 @@
 import falcon
 import json
+import os
 import time
+import zipfile
 
 from fp_dummy_datastore import DummyFPDataStore
 from fp_json_blob_datastore import JsonBlobDataStore
@@ -49,8 +51,16 @@ class SingleUserResource(object):
 			resp.status = falcon.HTTP_404
 			resp.body = "User not found."
 		
+def unzip_json_file(filepath):
+	zipper = zipfile.ZipFile(filepath)
+	json_path = os.path.dirname(os.path.realpath(__file__))
+	extracted_filename = zipper.namelist()[0]
+	zipper.extractall(json_path)
+	zipper.close()
+	return os.path.join(json_path, extracted_filename)
+
 ds = JsonBlobDataStore()
-ds.add_data_from_json_zip("./fake_profiles.zip")
+ds.add_data_from_json_file(unzip_json_file("./fake_profiles.zip"))
 
 app = falcon.API()
 

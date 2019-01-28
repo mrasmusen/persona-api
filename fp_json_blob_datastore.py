@@ -1,6 +1,5 @@
 import json
 import os
-import zipfile
 
 from fp_datastore import FakeProfilesDataStore, DataOutOfRangeError, ResourceNotFoundError
 
@@ -9,14 +8,8 @@ class JsonBlobDataStore(FakeProfilesDataStore):
     self.data = {}
 
 
-  def add_data_from_json_zip(self, filepath):
-    zipper = zipfile.ZipFile(filepath)
-    json_path = os.path.dirname(os.path.realpath(__file__))
-    extracted_filename = zipper.namelist()[0]
-    zipper.extractall(json_path)
-    zipper.close()
-
-    json_file = os.path.join(json_path, extracted_filename)
+  def add_data_from_json_file(self, filepath):
+    json_file = os.path.join(filepath)
     raw_json = open(json_file).read()
     self.data = json.loads(raw_json)
   
