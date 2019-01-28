@@ -3,6 +3,7 @@ import json
 import time
 
 from fp_dummy_datastore import DummyFPDataStore
+from fp_json_blob_datastore import JsonBlobDataStore
 from fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
 
 class AllUsersResource(object):
@@ -48,7 +49,9 @@ class SingleUserResource(object):
 			resp.status = falcon.HTTP_404
 			resp.body = "User not found."
 		
-ds = DummyFPDataStore()
+ds = JsonBlobDataStore()
+ds.add_data_from_json_zip("./fake_profiles.zip")
+
 app = falcon.API()
 
 all_users_resourse = AllUsersResource(ds)
