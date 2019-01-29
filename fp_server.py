@@ -6,6 +6,7 @@ import zipfile
 
 from fp_dummy_datastore import DummyFPDataStore
 from fp_json_blob_datastore import JsonBlobDataStore
+from fp_sql_datastore import SqlDataStore
 from fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
 
 class AllUsersResource(object):
@@ -59,13 +60,16 @@ def unzip_json_file(filepath):
 	zipper.close()
 	return os.path.join(json_path, extracted_filename)
 
-ds = JsonBlobDataStore()
+# Create a data store and add the json data from the file
+ds = SqlDataStore()
 ds.add_data_from_json_file(unzip_json_file("./fake_profiles.zip"))
 
 app = falcon.API()
 
+# Set up resources
 all_users_resourse = AllUsersResource(ds)
 single_user_resource = SingleUserResource(ds)
 
+# Add routes to app
 app.add_route("/users", all_users_resourse,)
 app.add_route("/users/{username}", single_user_resource)

@@ -37,6 +37,14 @@ class FakeProfilesDataStore(ABC):
   def delete_single_user(self, username):
     pass
   
+  """
+    Method to load the data from an unzipped json file into
+    the database.
+  """
+  @abstractmethod
+  def add_data_from_json_file(self, jsonfile):
+    pass
+  
 class NoDataStoreError(Exception):
   pass
 
