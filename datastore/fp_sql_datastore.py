@@ -14,15 +14,15 @@ import ijson
 import os
 import sqlite3
 
-from fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
+from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
 
 class SqlDataStore(FakeProfilesDataStore):
   def __init__(self):
-    data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "db")
-    if os.path.isfile(data_path):
-      os.remove(data_path)
+    self.data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "db")
+    if os.path.isfile(self.data_path):
+      os.remove(self.data_path)
     
-    db = sqlite3.connect("data/db")
+    db = sqlite3.connect(self.data_path)
     cursor = db.cursor()
     
     cursor.execute("""
@@ -35,12 +35,9 @@ class SqlDataStore(FakeProfilesDataStore):
     cursor.execute("""
       CREATE TABLE websites(id INTEGER PRIMARY KEY, user_id INTEGER, website TEXT)
     """)
-
-  def add_json_from_file(self, jsonfile):
-    pass
   
   def get_single_user(self, username):
-    db = sqlite3.connect("data/db")
+    db = sqlite3.connect(self.data_path)
     cursor = db.cursor()
     
     cursor.execute("""
@@ -63,7 +60,7 @@ class SqlDataStore(FakeProfilesDataStore):
     return self.format_rows_into_json(users_data, websites_data)
   
   def get_all_users(self, start_index, page_size):
-    db = sqlite3.connect("data/db")
+    db = sqlite3.connect(self.data_path)
     cursor = db.cursor()
     
     cursor.execute("""
@@ -86,7 +83,7 @@ class SqlDataStore(FakeProfilesDataStore):
     return self.format_rows_into_json(users_data, websites_data)
 
   def delete_single_user(self, username):
-    db = sqlite3.connect("data/db")
+    db = sqlite3.connect(self.data_path)
     cursor = db.cursor()
     
     cursor.execute("""
@@ -96,8 +93,10 @@ class SqlDataStore(FakeProfilesDataStore):
     db.commit()
   
   def add_data_from_json_file(self, jsonfile):
-    db = sqlite3.connect("data/db")
+    db = sqlite3.connect(self.data_path)
     cursor = db.cursor()
+    
+    print("Importing JSON data.")
     
     with open(jsonfile) as jf:
       counter = 0
@@ -131,6 +130,8 @@ class SqlDataStore(FakeProfilesDataStore):
           """, {"user_id": counter, "website": website})
         
     db.commit()
+
+    print("Finished importing JSON.")
   
   """
     Takes the raw database output and formats it into the json the user expects.
@@ -166,5 +167,5 @@ class SqlDataStore(FakeProfilesDataStore):
     }
   
   def __del__(self):
-    db = sqlite3.connect("data/db")
+    db = sqlite3.connect(self.data_path)
     db.close()

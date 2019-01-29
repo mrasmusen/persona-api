@@ -1,7 +1,7 @@
 import json
 import os
 
-from fp_datastore import FakeProfilesDataStore, DataOutOfRangeError, ResourceNotFoundError
+from datastore.fp_datastore import FakeProfilesDataStore, DataOutOfRangeError, ResourceNotFoundError
 
 class JsonBlobDataStore(FakeProfilesDataStore):
   def __init__(self):

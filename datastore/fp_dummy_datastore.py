@@ -5,7 +5,7 @@
   to raise errors. The schema is arbitrary and isn't related 
   to the actual data the fake profiles use.
 """
-from fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
+from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
 
 class DummyFPDataStore(FakeProfilesDataStore):
   def __init__(self):
@@ -46,3 +46,6 @@ class DummyFPDataStore(FakeProfilesDataStore):
   def delete_single_user(self, username):
     if username == "notfound":
       raise ResourceNotFoundError()
+  
+  def add_data_from_json_file(self, jsonfile):
+    pass
