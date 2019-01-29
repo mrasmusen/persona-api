@@ -26,3 +26,16 @@ We would like to see good practices regarding the REST API, project structure, c
 
 Come up with some ideas to visualise the fake profile data on a front-end using a framework of your choice.
 
+## Setup
+You need to install the required python modules: `pip install -r requirements.txt`
+Add the `persona-api` directory to your PATH
+
+## To run
+Navigate to the persona-api directory. 
+
+### Linux/MacOS
+run the command `gunicorn things:app`
+
+### Windows
+gunicorn isn't supported on Windows, instead use waitress
+`waitress-serve --port=8000 things:app`
