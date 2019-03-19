@@ -12,7 +12,7 @@
 
 import ijson
 import os
-import sqlite3
+import mysql.connector
 
 from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
 
@@ -22,27 +22,20 @@ class SqlDataStore(FakeProfilesDataStore):
     if os.path.isfile(self.data_path):
       os.remove(self.data_path)
     
-    db = sqlite3.connect(self.data_path)
+    db = mysql.connector.connect(user='persona_user', password='password',
+                                 host='localhost',
+                                 database='personadb')
     cursor = db.cursor()
-    
-    cursor.execute("""
-      CREATE TABLE users(id INTEGER PRIMARY KEY, job TEXT, company TEXT, ssn TEXT,
-                         residence TEXT, longditude REAL, latitude REAL, 
-                         blood_group TEXT, username TEXT, name TEXT, sex TEXT,
-                         address TEXT, mail TEXT, birthdate TEXT)
-    """)
-
-    cursor.execute("""
-      CREATE TABLE websites(id INTEGER PRIMARY KEY, user_id INTEGER, website TEXT)
-    """)
   
   def get_single_user(self, username):
-    db = sqlite3.connect(self.data_path)
+    db = mysql.connector.connect(user='persona_user', password='password',
+                                 host='localhost',
+                                 database='personadb')
     cursor = db.cursor()
     
     cursor.execute("""
-      SELECT * from users WHERE username=:username;
-    """, {"username": username})
+      SELECT * from users WHERE username=%s;
+    """, (username, ))
 
     """
       Need to get the websites data in separate calls, since sqlite3 doesn't support
@@ -52,20 +45,22 @@ class SqlDataStore(FakeProfilesDataStore):
     websites_data = {}
     for user in users_data:
       cursor.execute("""
-        SELECT website from websites WHERE user_id=:user_id;
-      """, {"user_id": user[0]})
+        SELECT website from websites WHERE user_id=%s;
+      """, (user[0], ))
 
       websites_data[user[0]] = cursor.fetchall()
 
     return self.format_rows_into_json(users_data, websites_data)
   
   def get_all_users(self, start_index, page_size):
-    db = sqlite3.connect(self.data_path)
+    db = mysql.connector.connect(user='persona_user', password='password',
+                                 host='localhost',
+                                 database='personadb')
     cursor = db.cursor()
     
     cursor.execute("""
-      SELECT * from users WHERE id>=:start_idx AND id<:end_idx;
-    """, {"start_idx": start_index, "end_idx": start_index + page_size})
+      SELECT * from users WHERE id>=%s AND id<%s;
+    """, (start_index, start_index + page_size))
 
     """
       Need to get the websites data in separate calls, since sqlite3 doesn't support
@@ -74,26 +69,31 @@ class SqlDataStore(FakeProfilesDataStore):
     users_data = cursor.fetchall()
     websites_data = {}
     for user in users_data:
+      # print(user)
       cursor.execute("""
-        SELECT website from websites WHERE user_id=:user_id;
-      """, {"user_id": user[0]})
+        SELECT website from websites WHERE user_id=%s;
+      """, (user[0], ))
 
       websites_data[user[0]] = cursor.fetchall()
 
     return self.format_rows_into_json(users_data, websites_data)
 
   def delete_single_user(self, username):
-    db = sqlite3.connect(self.data_path)
+    db = mysql.connector.connect(user='persona_user', password='password',
+                                 host='localhost',
+                                 database='personadb')
     cursor = db.cursor()
     
     cursor.execute("""
-      DELETE FROM users WHERE username=:username
-    """, {"username": username})
+      DELETE FROM users WHERE username=%s
+    """, (username, ))
 
     db.commit()
   
   def add_data_from_json_file(self, jsonfile):
-    db = sqlite3.connect(self.data_path)
+    db = mysql.connector.connect(user='persona_user', password='password',
+                                 host='localhost',
+                                 database='personadb')
     cursor = db.cursor()
     
     print("Importing JSON data.")
@@ -110,25 +110,28 @@ class SqlDataStore(FakeProfilesDataStore):
           Explicitly set the id so we can add items to the websites database with the
           same counter as the user_id.
         """
+        # print("Inserting item {}".format(counter))
         counter += 1
+        if counter > 1000:
+          break
         cursor.execute("""
           INSERT INTO users(id, job, company, ssn, residence, longditude, latitude, 
                             blood_group, username, name, sex, address, mail, birthdate)
 
-                          VALUES(:id, :job, :company, :ssn, :residence, :longditude, :latitude, 
-                            :blood_group, :username, :name, :sex, :address, :mail, :birthdate)
+                          VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 
-        """, {"id": counter, "job": item["job"], "company": item["company"], "ssn": item["ssn"], "residence": item["residence"], 
-              "longditude": float(item["current_location"][0]), "latitude": float(item["current_location"][1]), 
-              "blood_group": item["blood_group"], "username": item["username"], "name": item["name"], 
-              "sex": item["sex"], "address": item["address"], "mail": item["mail"], "birthdate": item["birthdate"]})
+        """, (counter, item["job"], item["company"], item["ssn"], item["residence"], 
+              float(item["current_location"][0]), float(item["current_location"][1]), 
+              item["blood_group"], item["username"], item["name"], 
+              item["sex"], item["address"], item["mail"],item["birthdate"]))
 
         for website in item["website"]:
           cursor.execute("""
             INSERT INTO websites(user_id, website) 
-            VALUES(:user_id, :website)
-          """, {"user_id": counter, "website": website})
-        
+            VALUES(%s, %s)
+          """, (counter, website))
+    print("here")
+    
     db.commit()
 
     print("Finished importing JSON.")
@@ -167,5 +170,7 @@ class SqlDataStore(FakeProfilesDataStore):
     }
   
   def __del__(self):
-    db = sqlite3.connect(self.data_path)
+    db = mysql.connector.connect(user='persona_user', password='password',
+                                 host='localhost',
+                                 database='personadb')
     db.close()

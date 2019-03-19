@@ -15,7 +15,7 @@ def unzip_json_file(filepath):
 
 # Create a data store and add the json data from the file
 ds = SqlDataStore()
-ds.add_data_from_json_file(unzip_json_file("./fake_profiles.zip"))
+# ds.add_data_from_json_file(unzip_json_file("./fake_profiles.zip"))
 
 # app variable needs to be globally accessible
 app = falcon.API()
