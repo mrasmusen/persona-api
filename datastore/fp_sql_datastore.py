@@ -16,19 +16,15 @@ import mysql.connector
 
 from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
 
+MYSQL_DB_IP = "10.109.76.57" # todo env variable or something 
+
 class SqlDataStore(FakeProfilesDataStore):
   def __init__(self):
-    self.data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", "db")
-    if os.path.isfile(self.data_path):
-      os.remove(self.data_path)
-    
-    db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='172.17.0.1',
-                                 database='personadb')
+    pass
   
   def get_single_user(self, username):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='172.17.0.1',
+                                 host=MYSQL_DB_IP,
                                  database='personadb')
     cursor = db.cursor()
     
@@ -53,7 +49,7 @@ class SqlDataStore(FakeProfilesDataStore):
   
   def get_all_users(self, start_index, page_size):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='172.17.0.1',
+                                 host=MYSQL_DB_IP,
                                  database='personadb')
     cursor = db.cursor()
     
@@ -79,7 +75,7 @@ class SqlDataStore(FakeProfilesDataStore):
 
   def delete_single_user(self, username):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='172.17.0.1',
+                                 host=MYSQL_DB_IP,
                                  database='personadb')
     cursor = db.cursor()
     
@@ -91,7 +87,7 @@ class SqlDataStore(FakeProfilesDataStore):
   
   def add_data_from_json_file(self, jsonfile):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='172.17.0.1',
+                                 host=MYSQL_DB_IP,
                                  database='personadb')
     cursor = db.cursor()
     
@@ -170,6 +166,6 @@ class SqlDataStore(FakeProfilesDataStore):
   
   def __del__(self):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='172.17.0.1',
+                                 host=MYSQL_DB_IP,
                                  database='personadb')
     db.close()
