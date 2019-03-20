@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: persona-api
+spec:
+  selector:
+    matchLabels:
+      app: persona
+  replicas: 2
+  template:
+    metadata: 
+      labels: 
+        app: persona
+    spec:
+      containers:
+      - name: persona
+        image: persona
+        imagePullPolicy: Never
