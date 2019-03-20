@@ -23,13 +23,12 @@ class SqlDataStore(FakeProfilesDataStore):
       os.remove(self.data_path)
     
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='localhost',
+                                 host='172.17.0.1',
                                  database='personadb')
-    cursor = db.cursor()
   
   def get_single_user(self, username):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='localhost',
+                                 host='172.17.0.1',
                                  database='personadb')
     cursor = db.cursor()
     
@@ -54,7 +53,7 @@ class SqlDataStore(FakeProfilesDataStore):
   
   def get_all_users(self, start_index, page_size):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='localhost',
+                                 host='172.17.0.1',
                                  database='personadb')
     cursor = db.cursor()
     
@@ -80,7 +79,7 @@ class SqlDataStore(FakeProfilesDataStore):
 
   def delete_single_user(self, username):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='localhost',
+                                 host='172.17.0.1',
                                  database='personadb')
     cursor = db.cursor()
     
@@ -92,7 +91,7 @@ class SqlDataStore(FakeProfilesDataStore):
   
   def add_data_from_json_file(self, jsonfile):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='localhost',
+                                 host='172.17.0.1',
                                  database='personadb')
     cursor = db.cursor()
     
@@ -171,6 +170,6 @@ class SqlDataStore(FakeProfilesDataStore):
   
   def __del__(self):
     db = mysql.connector.connect(user='persona_user', password='password',
-                                 host='localhost',
+                                 host='172.17.0.1',
                                  database='personadb')
     db.close()
