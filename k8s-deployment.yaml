@@ -16,3 +16,11 @@ spec:
       - name: persona
         image: persona
         imagePullPolicy: Never
+        volumeMounts:
+        - name: persona-db-password
+          readOnly: true
+          mountPath: "/etc/db-password"
+      volumes:
+      - name: persona-db-password
+        secret: 
+          secretName: persona-db-pass

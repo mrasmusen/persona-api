@@ -20,12 +20,17 @@ MYSQL_DB_IP = "10.109.76.57" # todo env variable or something
 
 class SqlDataStore(FakeProfilesDataStore):
   def __init__(self):
-    pass
-  
+    password_file = open("/etc/db-password/password.txt")
+    db_password = password_file.read()
+    self.db_conn_data = {
+      "user": 'persona_user',
+      "password": db_password,
+      "host": os.environ["FOOLHARDY_LIGER_MYSQL_SERVICE_HOST"],
+      "database": "personadb"
+    }
+    
   def get_single_user(self, username):
-    db = mysql.connector.connect(user='persona_user', password='password',
-                                 host=MYSQL_DB_IP,
-                                 database='personadb')
+    db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
     cursor.execute("""
@@ -48,9 +53,7 @@ class SqlDataStore(FakeProfilesDataStore):
     return self.format_rows_into_json(users_data, websites_data)
   
   def get_all_users(self, start_index, page_size):
-    db = mysql.connector.connect(user='persona_user', password='password',
-                                 host=MYSQL_DB_IP,
-                                 database='personadb')
+    db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
     cursor.execute("""
@@ -74,9 +77,7 @@ class SqlDataStore(FakeProfilesDataStore):
     return self.format_rows_into_json(users_data, websites_data)
 
   def delete_single_user(self, username):
-    db = mysql.connector.connect(user='persona_user', password='password',
-                                 host=MYSQL_DB_IP,
-                                 database='personadb')
+    db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
     cursor.execute("""
@@ -86,9 +87,7 @@ class SqlDataStore(FakeProfilesDataStore):
     db.commit()
   
   def add_data_from_json_file(self, jsonfile):
-    db = mysql.connector.connect(user='persona_user', password='password',
-                                 host=MYSQL_DB_IP,
-                                 database='personadb')
+    db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
     print("Importing JSON data.")
@@ -165,7 +164,5 @@ class SqlDataStore(FakeProfilesDataStore):
     }
   
   def __del__(self):
-    db = mysql.connector.connect(user='persona_user', password='password',
-                                 host=MYSQL_DB_IP,
-                                 database='personadb')
+    db = mysql.connector.connect(**self.db_conn_data)
     db.close()
