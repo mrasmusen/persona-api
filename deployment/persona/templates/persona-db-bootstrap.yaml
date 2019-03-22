@@ -1,23 +1,15 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: {{ include "persona.fullname" . }}-db-bootstrap
   annotations:
     "helm.sh/hook": "post-install"
 spec:
-  selector:
-    matchLabels:
-      app: persona-db-bootstrap
-  restartPolicy: OnFailure
-  replicas: 1
   template:
-    metadata: 
-      labels: 
-        app: persona-db-bootstrap
     spec:
       containers:
       - name: persona-db-bootstrap
-        image: persona_db_bootstrap:latest
+        image: persona-db-bootstrap:latest
         imagePullPolicy: Never
         env:
           - name: MYSQL_SERVICE_USER
@@ -31,3 +23,4 @@ spec:
               secretKeyRef:
                 name: {{ template "persona.mysql.fullname" . }}
                 key: mysql-password
+      restartPolicy: OnFailure
