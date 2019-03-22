@@ -2,5 +2,4 @@ falcon
 waitress
 pytest
 gunicorn
-ijson
 mysql-connector
