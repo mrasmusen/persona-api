@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "persona.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app: persona
+  replicas: 2
+  template:
+    metadata: 
+      labels: 
+        app: persona
+    spec:
+      containers:
+      - name: persona
+        image: persona:latest
+        imagePullPolicy: Never
+        env:
+          - name: MYSQL_SERVICE_USER
+            value: {{ .Values.mysql.mysqlUser }}
+          - name: MYSQL_SERVICE_PERSONA_DB
+            value: {{ .Values.mysql.mysqlDatabase }}
+          - name: MYSQL_SERVICE_PREFIX
+            value: {{ .Release.Name }}
+          - name: MYSQL_SERVICE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "persona.mysql.fullname" . }}
+                key: mysql-password

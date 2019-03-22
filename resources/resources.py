@@ -7,7 +7,7 @@ import zipfile
 from datastore.fp_dummy_datastore import DummyFPDataStore
 from datastore.fp_json_blob_datastore import JsonBlobDataStore
 from datastore.fp_sql_datastore import SqlDataStore
-from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
+from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError, NoDataStoreError
 
 class AllUsersResource(object):
 	def __init__(self, datastore):
@@ -29,6 +29,9 @@ class AllUsersResource(object):
 		except (KeyError, ValueError):
 			resp.status = falcon.HTTP_400
 			resp.body = "Required parameters: start<int> and pagesize<int>"
+		except NoDataStoreError:
+			resp.status = falcon.HTTP_500
+			resp.body = "Not connected to database."
 
 class SingleUserResource(object):
 	def __init__(self, datastore):
@@ -42,6 +45,9 @@ class SingleUserResource(object):
 		except ResourceNotFoundError:
 			resp.status = falcon.HTTP_404
 			resp.body = "User not found."
+		except NoDataStoreError:
+			resp.status = falcon.HTTP_500
+			resp.body = "Not connected to database."
 
 	def on_delete(self, req, resp, username):
 		try:

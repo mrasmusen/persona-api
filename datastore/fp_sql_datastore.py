@@ -13,23 +13,29 @@
 import ijson
 import os
 import mysql.connector
+import traceback
 
-from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError
-
-MYSQL_DB_IP = "10.109.76.57" # todo env variable or something 
+from datastore.fp_datastore import FakeProfilesDataStore, ResourceNotFoundError, DataOutOfRangeError, NoDataStoreError
 
 class SqlDataStore(FakeProfilesDataStore):
   def __init__(self):
-    password_file = open("/etc/db-password/password.txt")
-    db_password = password_file.read()
-    self.db_conn_data = {
-      "user": 'persona_user',
-      "password": db_password,
-      "host": os.environ["FOOLHARDY_LIGER_MYSQL_SERVICE_HOST"],
-      "database": "personadb"
-    }
+    self.db_conn_data = None
+    try:
+      host_env_name = "{}_MYSQL_SERVICE_HOST".format(os.environ["MYSQL_SERVICE_PREFIX"].upper().replace("-", "_"))
+      self.db_conn_data = {
+        "user": os.environ["MYSQL_SERVICE_USER"],
+        "password": os.environ["MYSQL_SERVICE_PASSWORD"],
+        "host": os.environ[host_env_name],
+        "database": os.environ["MYSQL_SERVICE_PERSONA_DB"]
+      }
+    except Exception:
+      traceback.print_exc()
+      self.db_conn_data = None
     
   def get_single_user(self, username):
+    if self.db_conn_data is None:
+      raise NoDataStoreError
+      
     db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
@@ -53,6 +59,9 @@ class SqlDataStore(FakeProfilesDataStore):
     return self.format_rows_into_json(users_data, websites_data)
   
   def get_all_users(self, start_index, page_size):
+    if self.db_conn_data is None:
+      raise NoDataStoreError
+      
     db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
@@ -77,6 +86,9 @@ class SqlDataStore(FakeProfilesDataStore):
     return self.format_rows_into_json(users_data, websites_data)
 
   def delete_single_user(self, username):
+    if self.db_conn_data is None:
+      raise NoDataStoreError
+
     db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
@@ -87,6 +99,9 @@ class SqlDataStore(FakeProfilesDataStore):
     db.commit()
   
   def add_data_from_json_file(self, jsonfile):
+    if self.db_conn_data is None:
+      raise NoDataStoreError
+
     db = mysql.connector.connect(**self.db_conn_data)
     cursor = db.cursor()
     
@@ -134,6 +149,9 @@ class SqlDataStore(FakeProfilesDataStore):
     Takes the raw database output and formats it into the json the user expects.
   """
   def format_rows_into_json(self, rows, websites):
+    if self.db_conn_data is None:
+      raise NoDataStoreError
+
     json_list = []
     for row in rows:
       json_list.append(self.format_row_into_json(row, websites[row[0]]))
@@ -144,6 +162,9 @@ class SqlDataStore(FakeProfilesDataStore):
     Build single json item from raw data.
   """
   def format_row_into_json(self, row, websites):
+    if self.db_conn_data is None:
+      raise NoDataStoreError
+
     return {
       "job": row[1],
       "company": row[2],
@@ -164,5 +185,8 @@ class SqlDataStore(FakeProfilesDataStore):
     }
   
   def __del__(self):
+    if self.db_conn_data is None:
+      raise NoDataStoreError
+      
     db = mysql.connector.connect(**self.db_conn_data)
     db.close()
