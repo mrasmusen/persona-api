@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# json data
+fake_profiles.json
+
+# vscode data
+.vscode/

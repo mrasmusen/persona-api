@@ -10,7 +10,6 @@
   since the websites attribute has a variable length between users.
 """
 
-import ijson
 import os
 import mysql.connector
 import traceback
@@ -21,12 +20,11 @@ class SqlDataStore(FakeProfilesDataStore):
   def __init__(self):
     self.db_conn_data = None
     try:
-      host_env_name = "{}_MYSQL_SERVICE_HOST".format(os.environ["MYSQL_SERVICE_PREFIX"].upper().replace("-", "_"))
       self.db_conn_data = {
-        "user": os.environ["MYSQL_SERVICE_USER"],
-        "password": os.environ["MYSQL_SERVICE_PASSWORD"],
-        "host": os.environ[host_env_name],
-        "database": os.environ["MYSQL_SERVICE_PERSONA_DB"]
+        "user": os.getenv("MYSQL_SERVICE_USER", "persona_user"),
+        "password": os.getenv("MYSQL_SERVICE_PASSWORD", "password"),
+        "host": os.getenv("MYSQL_SERVICE_HOST", "localhost"),
+        "database": os.getenv("MYSQL_SERVICE_PERSONA_DB", "personadb")
       }
     except Exception:
       traceback.print_exc()
@@ -98,53 +96,6 @@ class SqlDataStore(FakeProfilesDataStore):
 
     db.commit()
   
-  def add_data_from_json_file(self, jsonfile):
-    if self.db_conn_data is None:
-      raise NoDataStoreError
-
-    db = mysql.connector.connect(**self.db_conn_data)
-    cursor = db.cursor()
-    
-    print("Importing JSON data.")
-    
-    with open(jsonfile) as jf:
-      counter = 0
-      """
-        Use ijson to iterate through the json data - the file is fairly big and using the
-        default json module could cause memory issues. ijson is an iterative parser that
-        allows us to stream in the file.
-      """
-      for item in ijson.items(jf, 'item'):
-        """
-          Explicitly set the id so we can add items to the websites database with the
-          same counter as the user_id.
-        """
-        # print("Inserting item {}".format(counter))
-        counter += 1
-        if counter > 1000:
-          break
-        cursor.execute("""
-          INSERT INTO users(id, job, company, ssn, residence, longditude, latitude, 
-                            blood_group, username, name, sex, address, mail, birthdate)
-
-                          VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-
-        """, (counter, item["job"], item["company"], item["ssn"], item["residence"], 
-              float(item["current_location"][0]), float(item["current_location"][1]), 
-              item["blood_group"], item["username"], item["name"], 
-              item["sex"], item["address"], item["mail"],item["birthdate"]))
-
-        for website in item["website"]:
-          cursor.execute("""
-            INSERT INTO websites(user_id, website) 
-            VALUES(%s, %s)
-          """, (counter, website))
-    print("here")
-    
-    db.commit()
-
-    print("Finished importing JSON.")
-  
   """
     Takes the raw database output and formats it into the json the user expects.
   """
@@ -183,6 +134,9 @@ class SqlDataStore(FakeProfilesDataStore):
       "mail": row[12],
       "birthdate": row[13]
     }
+  
+  def add_data_from_json_file(self, jsonfile):
+    pass
   
   def __del__(self):
     if self.db_conn_data is None:

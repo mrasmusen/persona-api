@@ -21,8 +21,8 @@ spec:
             value: {{ .Values.mysql.mysqlUser }}
           - name: MYSQL_SERVICE_PERSONA_DB
             value: {{ .Values.mysql.mysqlDatabase }}
-          - name: MYSQL_SERVICE_PREFIX
-            value: {{ .Release.Name }}
+          - name: MYSQL_SERVICE_HOST
+            value: {{ template "persona.mysql.fullname" . }}
           - name: MYSQL_SERVICE_PASSWORD
             valueFrom:
               secretKeyRef:

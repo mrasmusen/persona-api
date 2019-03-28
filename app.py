@@ -3,7 +3,7 @@ import os
 import zipfile
 
 from resources.resources import AllUsersResource, SingleUserResource
-from datastore.fp_sql_datastore import SqlDataStore
+from datastore.fp_mongo_datastore import MongoDataStore
 
 def unzip_json_file(filepath):
 	zipper = zipfile.ZipFile(filepath)
@@ -14,8 +14,8 @@ def unzip_json_file(filepath):
 	return os.path.join(json_path, extracted_filename)
 
 # Create a data store and add the json data from the file
-ds = SqlDataStore()
-# ds.add_data_from_json_file(unzip_json_file("./fake_profiles.zip"))
+ds = MongoDataStore()
+# ds.add_data_from_json_file(unzip_json_file("./../persona-db-bootstrap/fake_profiles.zip"))
 
 # app variable needs to be globally accessible
 app = falcon.API()

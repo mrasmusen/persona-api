@@ -3,3 +3,4 @@ waitress
 pytest
 gunicorn
 mysql-connector
+mongoengine
