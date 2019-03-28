@@ -66,26 +66,26 @@ class SqlDataStore(FakeProfilesDataStore):
         if self.db_conn_data is None:
             raise NoDataStoreError
 
-    db = mysql.connector.connect(**self.db_conn_data)
-    cursor = db.cursor()
+        db = mysql.connector.connect(**self.db_conn_data)
+        cursor = db.cursor()
 
-    cursor.execute("""
-        SELECT * from users WHERE id>=%s AND id<%s;
-        """, (start_index, start_index + page_size))
-
-    """
-      Need to get the websites data in separate calls, since
-      sqlite3 doesn't support FULL OUTER JOINs in python.
-    """
-    users_data = cursor.fetchall()
-    websites_data = {}
-    for user in users_data:
-        # print(user)
         cursor.execute("""
-            SELECT website from websites WHERE user_id=%s;
-        """, (user[0], ))
+                SELECT * from users WHERE id>=%s AND id<%s;
+            """, (start_index, start_index + page_size))
 
-        websites_data[user[0]] = cursor.fetchall()
+        """
+            Need to get the websites data in separate calls, since
+            sqlite3 doesn't support FULL OUTER JOINs in python.
+        """
+        users_data = cursor.fetchall()
+        websites_data = {}
+        for user in users_data:
+            # print(user)
+            cursor.execute("""
+                SELECT website from websites WHERE user_id=%s;
+            """, (user[0], ))
+
+            websites_data[user[0]] = cursor.fetchall()
 
         return self.format_rows_into_json(users_data, websites_data)
 
@@ -93,14 +93,14 @@ class SqlDataStore(FakeProfilesDataStore):
         if self.db_conn_data is None:
             raise NoDataStoreError
 
-    db = mysql.connector.connect(**self.db_conn_data)
-    cursor = db.cursor()
+        db = mysql.connector.connect(**self.db_conn_data)
+        cursor = db.cursor()
 
-    cursor.execute("""
-           DELETE FROM users WHERE username=%s
-        """, (username, ))
+        cursor.execute("""
+                DELETE FROM users WHERE username=%s
+            """, (username, ))
 
-    db.commit()
+        db.commit()
 
     """
         Takes the raw database output and formats it into the json
@@ -150,5 +150,5 @@ class SqlDataStore(FakeProfilesDataStore):
         if self.db_conn_data is None:
             raise NoDataStoreError
 
-    db = mysql.connector.connect(**self.db_conn_data)
-    db.close()
+        db = mysql.connector.connect(**self.db_conn_data)
+        db.close()
