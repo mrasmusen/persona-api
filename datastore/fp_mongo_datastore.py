@@ -8,8 +8,12 @@ import traceback
 
 from mongoengine import connect, Document, StringField, ListField, FloatField
 
-from datastore.fp_datastore import FakeProfilesDataStore, \
-              ResourceNotFoundError, DataOutOfRangeError, NoDataStoreError
+from datastore.fp_datastore import (
+    FakeProfilesDataStore,
+    ResourceNotFoundError,
+    DataOutOfRangeError,
+    NoDataStoreError
+)
 
 
 class MongoDataStore(FakeProfilesDataStore):

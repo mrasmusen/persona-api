@@ -14,8 +14,12 @@ import os
 import mysql.connector
 import traceback
 
-from datastore.fp_datastore import FakeProfilesDataStore, \
-    ResourceNotFoundError, DataOutOfRangeError, NoDataStoreError
+from datastore.fp_datastore import (
+    FakeProfilesDataStore,
+    ResourceNotFoundError,
+    DataOutOfRangeError,
+    NoDataStoreError
+)
 
 
 class SqlDataStore(FakeProfilesDataStore):
