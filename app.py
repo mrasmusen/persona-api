@@ -1,21 +1,37 @@
+import argparse
+import configparser
 import falcon
 import os
+import sys
 import zipfile
 
 from resources.resources import AllUsersResource, SingleUserResource
 from datastore.fp_mongo_datastore import MongoDataStore
+from datastore.fp_sql_datastore import SqlDataStore
+from datastore.fp_dummy_datastore import DummyFPDataStore
 
-def unzip_json_file(filepath):
-	zipper = zipfile.ZipFile(filepath)
-	json_path = os.path.dirname(os.path.realpath(__file__))
-	extracted_filename = zipper.namelist()[0]
-	zipper.extractall(json_path)
-	zipper.close()
-	return os.path.join(json_path, extracted_filename)
 
-# Create a data store and add the json data from the file
-ds = MongoDataStore()
-# ds.add_data_from_json_file(unzip_json_file("./../persona-db-bootstrap/fake_profiles.zip"))
+# App will use the DATABASE_TYPE environment variable to know
+# which DataStore adapter to use. Will default to using a
+# dummy datastore.
+db_type = os.getenv("DATABASE_TYPE", "dummy")
+
+# Dictionary mapping environment variable data to datastore
+# implementations.
+supported_databases = {
+    "dummy": DummyFPDataStore,
+    "mysql": SqlDataStore,
+    "mongodb": MongoDataStore
+}
+
+# Create a data store
+try:
+    datastore_implementation = supported_databases[db_type]
+    ds = datastore_implementation()
+    print("Connecting to '{}' database.".format(db_type))
+except KeyError:
+    print("'{}' is not a supported database type.".format(db_type))
+    sys.exit(1)
 
 # app variable needs to be globally accessible
 app = falcon.API()
@@ -24,6 +40,6 @@ app = falcon.API()
 all_users_resourse = AllUsersResource(ds)
 single_user_resource = SingleUserResource(ds)
 
-# Add routes to app
+# # Add routes to app
 app.add_route("/users", all_users_resourse,)
 app.add_route("/users/{username}", single_user_resource)

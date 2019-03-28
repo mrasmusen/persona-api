@@ -17,6 +17,8 @@ spec:
         image: persona:latest
         imagePullPolicy: Never
         env:
+          - name: DATABASE_TYPE
+            value: mongodb
           - name: MONGODB_SERVICE_USER
             value: {{ .Values.mongodb.mongodbUsername }}
           - name: MONGODB_SERVICE_PERSONA_DB
