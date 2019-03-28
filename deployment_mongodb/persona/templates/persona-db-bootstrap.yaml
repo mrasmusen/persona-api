@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "persona.fullname" . }}-db-bootstrap
+  annotations:
+    "helm.sh/hook": "post-install"
+spec:
+  template:
+    spec:
+      containers:
+      - name: persona-db-bootstrap
+        image: persona-db-bootstrap:latest
+        imagePullPolicy: Never
+        env:
+          - name: MONGODB_SERVICE_USER
+            value: {{ .Values.mongodb.mongodbUsername }}
+          - name: MONGODB_SERVICE_PERSONA_DB
+            value: {{ .Values.mongodb.mongodbDatabase }}
+          - name: MONGODB_SERVICE_HOST
+            value: {{ template "persona.mongodb.fullname" . }}
+          - name: MONGODB_SERVICE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "persona.mongodb.fullname" . }}
+                key: mongodb-password
+        command: ["python"]
+        args: ["mongo_db_bootstrap.py"]
+      restartPolicy: OnFailure

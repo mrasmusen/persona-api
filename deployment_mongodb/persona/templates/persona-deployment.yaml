@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "persona.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app: persona
+  replicas: 2
+  template:
+    metadata: 
+      labels: 
+        app: persona
+    spec:
+      containers:
+      - name: persona
+        image: persona:latest
+        imagePullPolicy: Never
+        env:
+          - name: MONGODB_SERVICE_USER
+            value: {{ .Values.mongodb.mongodbUsername }}
+          - name: MONGODB_SERVICE_PERSONA_DB
+            value: {{ .Values.mongodb.mongodbDatabase }}
+          - name: MONGODB_SERVICE_HOST
+            value: {{ template "persona.mongodb.fullname" . }}
+          - name: MONGODB_SERVICE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "persona.mongodb.fullname" . }}
+                key: mongodb-password
