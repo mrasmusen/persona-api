@@ -39,6 +39,14 @@ class FakeProfilesDataStore(ABC):
         pass
 
     """
+        Adds a new user with the given username, and the
+        supplied data.
+    """
+    @abstractmethod
+    def add_single_user(self, data):
+        pass
+
+    """
         Method to load the data from an unzipped json file into
         the database.
     """

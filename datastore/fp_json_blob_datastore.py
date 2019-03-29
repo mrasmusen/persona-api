@@ -43,3 +43,6 @@ class JsonBlobDataStore(FakeProfilesDataStore):
                 got_user = True
         if not got_user:
             raise ResourceNotFoundError
+
+    def add_single_user(self, data):
+        pass

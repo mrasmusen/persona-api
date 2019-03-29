@@ -51,6 +51,9 @@ class DummyFPDataStore(FakeProfilesDataStore):
         if username == "notfound":
             raise ResourceNotFoundError()
 
+    def add_single_user(self, data):
+        pass
+
     def add_data_from_json_file(self, jsonfile):
         pass
 

@@ -102,6 +102,9 @@ class SqlDataStore(FakeProfilesDataStore):
 
         db.commit()
 
+    def add_single_user(self, data):
+        pass
+
     """
         Takes the raw database output and formats it into the json
         the user expects.

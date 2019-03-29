@@ -44,6 +44,18 @@ class AllUsersResource(object):
             resp.content_type = falcon.MEDIA_TEXT
             resp.body = "Not connected to database."
 
+    def on_post(self, req, resp):
+        resp.content_type = falcon.MEDIA_TEXT
+        try:
+            data = json.loads(req.stream.read().decode('utf-8'))
+            self.datastore.add_single_user(data)
+            resp.status = falcon.HTTP_201
+            resp.body = "User successfully added."
+        except Exception as e:
+            resp.status = falcon.HTTP_500
+            resp.body = "Unspecified error when saving data."
+            raise(e)
+
 
 class SingleUserResource(object):
     def __init__(self, datastore):
