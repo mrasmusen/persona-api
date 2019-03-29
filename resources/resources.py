@@ -33,12 +33,15 @@ class AllUsersResource(object):
             resp.status = falcon.HTTP_200
         except DataOutOfRangeError:
             resp.status = falcon.HTTP_400
+            resp.content_type = falcon.MEDIA_TEXT
             resp.body = "Data out of range!"
         except (KeyError, ValueError):
             resp.status = falcon.HTTP_400
+            resp.content_type = falcon.MEDIA_TEXT
             resp.body = "Required parameters: start<int> and pagesize<int>"
         except NoDataStoreError:
             resp.status = falcon.HTTP_500
+            resp.content_type = falcon.MEDIA_TEXT
             resp.body = "Not connected to database."
 
 
@@ -53,16 +56,20 @@ class SingleUserResource(object):
             resp.body = json.dumps(self.datastore.get_single_user(username))
         except ResourceNotFoundError:
             resp.status = falcon.HTTP_404
+            resp.content_type = falcon.MEDIA_TEXT
             resp.body = "User not found."
         except NoDataStoreError:
+            resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_500
             resp.body = "Not connected to database."
 
     def on_delete(self, req, resp, username):
         try:
             resp.status = falcon.HTTP_200
+            resp.content_type = falcon.MEDIA_TEXT
             self.datastore.delete_single_user(username)
             resp.body = "Deleted successfully."
         except ResourceNotFoundError:
+            resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_404
             resp.body = "User not found."

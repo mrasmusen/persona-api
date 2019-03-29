@@ -10,6 +10,9 @@ from datastore.fp_mongo_datastore import MongoDataStore
 from datastore.fp_sql_datastore import SqlDataStore
 from datastore.fp_dummy_datastore import DummyFPDataStore
 
+from falcon_swagger_ui import register_swaggerui_app
+
+import pathlib
 
 # App will use the DATABASE_TYPE environment variable to know
 # which DataStore adapter to use. Will default to using a
@@ -43,3 +46,21 @@ single_user_resource = SingleUserResource(ds)
 # # Add routes to app
 app.add_route("/users", all_users_resourse,)
 app.add_route("/users/{username}", single_user_resource)
+
+page_title = "Falcon Swagger Doc"
+favicon_url = 'https://falconframework.org/favicon-32x32.png'
+
+SCHEMA_URL = '/static/v1/swagger_api.yml'
+STATIC_PATH = pathlib.Path(__file__).parent / 'static'
+
+SWAGGERUI_URL = '/swagger'
+
+app.add_static_route('/static', str(STATIC_PATH))
+
+
+register_swaggerui_app(
+    app, SWAGGERUI_URL, SCHEMA_URL,
+    page_title=page_title,
+    favicon_url=favicon_url,
+    config={'supportedSubmitMethods': ['get', 'delete'], }
+)

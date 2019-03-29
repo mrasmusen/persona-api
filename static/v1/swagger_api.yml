@@ -1,0 +1,118 @@
+openapi: 3.0.0
+info: 
+  title: Persona API
+  description: API for retrieving data about people
+  version: 0.0.0
+
+paths:
+  /users:
+    get:
+      summary: Returns a paginated list of users.
+      tags:
+        - Users
+      parameters: 
+        - name: start
+          in: query
+          description: The start of the page.
+          required: true
+          schema:
+            type: integer
+        - name: pagesize
+          in: query
+          description: The size of the page.
+          required: true
+          schema:
+            type: integer
+      responses: 
+        '200':
+          description: A JSON array of the returned users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  type: object
+                  $ref: '#/components/schemas/User'
+  /users/{username}:
+    get:
+      summary: Get the details for a given user.
+      tags:
+        - Users
+      operationId: getSingleUser
+      parameters: 
+        - name: username
+          in: path
+          description: The username to get the details for.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A JSON object with the details of the desired user.
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/User'
+    delete:
+      summary: Deletes a user wih a given username.
+      tags: 
+        - Users
+      operationId: deleteSingleUser
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user to delete.
+          required: 
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: Plaintext with the details of the DELETE request.
+components:
+  schemas:
+    User:
+      properties:
+        username:
+          type: string
+          description: Username serves as the primary identifier for the user.
+        name: 
+          type: string
+          description: Full name of the user.
+        job: 
+          type: string
+          description: The job description of the user.
+        company: 
+          type: string
+          description: The company the user works for.
+        ssn:
+          type: string
+          description: The user's Social Security Number.
+        residence:
+          type: string
+          description: The user's home address.
+        current_location:
+          type: array
+          items: 
+            type: float
+          description: Co-ordinates of the user's workplace.
+        blood_group:
+          type: string
+          description: User's blood group.
+        website:
+          type: array
+          items: 
+            type: string
+          description: A list of websites registered for the user.
+        sex:
+          type: string
+          description: the user's sex.
+        address: 
+          type: string
+          description: Address of the user's workplace.
+        mail:
+          type: string
+          description: User's email address.
+        birthdate:
+          type: string
+          description: The user's date of birth.
