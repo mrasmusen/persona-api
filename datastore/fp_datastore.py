@@ -54,6 +54,14 @@ class FakeProfilesDataStore(ABC):
     def add_data_from_json_file(self, jsonfile):
         pass
 
+    """
+        Method to get data from the database based on a more complex
+        query from the user.
+    """
+    @abstractmethod
+    def get_complex_request(self, data):
+        pass
+
 
 class NoDataStoreError(Exception):
     pass

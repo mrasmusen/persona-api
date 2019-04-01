@@ -120,6 +120,9 @@ class SqlDataStore(FakeProfilesDataStore):
 
         return json_list
 
+    def get_complex_request(self, data):
+        pass
+
     """
         Build single json item from raw data.
     """

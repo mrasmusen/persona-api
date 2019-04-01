@@ -4,9 +4,6 @@ import os
 import time
 import zipfile
 
-from datastore.fp_dummy_datastore import DummyFPDataStore
-from datastore.fp_json_blob_datastore import JsonBlobDataStore
-from datastore.fp_sql_datastore import SqlDataStore
 from datastore.fp_datastore import (
     FakeProfilesDataStore,
     ResourceNotFoundError,
@@ -85,3 +82,28 @@ class SingleUserResource(object):
             resp.content_type = falcon.MEDIA_TEXT
             resp.status = falcon.HTTP_404
             resp.body = "User not found."
+
+
+class ComplexUserRequestResource(object):
+    def __init__(self, datastore):
+        self.datastore = datastore
+
+    def on_get(self, req, resp):
+        try:
+            resp.status = falcon.HTTP_200
+            resp.content_type = falcon.MEDIA_JSON
+            num_websites = int(req.params["numWebsites"])
+            job = req.params["job"]
+            pagesize = -1
+            if "pagesize" in req.params:
+                pagesize = int(req.params["pagesize"])
+            resp.body = json.dumps(
+                self.datastore.get_complex_request(
+                    num_websites=num_websites,
+                    job=job,
+                    pagesize=pagesize
+                ))
+        except Exception as e:
+            resp.status = falcon.HTTP_500
+            resp.body = "Unspecified error when saving data."
+            raise(e)

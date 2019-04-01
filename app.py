@@ -5,7 +5,12 @@ import os
 import sys
 import zipfile
 
-from resources.resources import AllUsersResource, SingleUserResource
+from resources.resources import (
+    AllUsersResource,
+    SingleUserResource,
+    ComplexUserRequestResource
+)
+
 from datastore.fp_mongo_datastore import MongoDataStore
 from datastore.fp_sql_datastore import SqlDataStore
 from datastore.fp_dummy_datastore import DummyFPDataStore
@@ -39,13 +44,10 @@ except KeyError:
 # app variable needs to be globally accessible
 app = falcon.API()
 
-# Set up resources
-all_users_resourse = AllUsersResource(ds)
-single_user_resource = SingleUserResource(ds)
-
 # # Add routes to app
-app.add_route("/users", all_users_resourse,)
-app.add_route("/users/{username}", single_user_resource)
+app.add_route("/users", AllUsersResource(ds))
+app.add_route("/users/{username}", SingleUserResource(ds))
+app.add_route("/users/complex_request", ComplexUserRequestResource(ds))
 
 page_title = "Falcon Swagger Doc"
 favicon_url = 'https://falconframework.org/favicon-32x32.png'

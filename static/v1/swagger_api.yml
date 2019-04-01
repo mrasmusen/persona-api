@@ -85,7 +85,43 @@ paths:
       responses:
         '200':
           description: Plaintext with the details of the DELETE request.
-
+  /users/complex_request:
+    get:
+      summary: Get a group of users that meet certain criteria defined by the user.
+      produces: 
+        - application/json
+      tags:
+        - Users
+      parameters: 
+        - name: numWebsites
+          in: query
+          description: The minimum number of websites for users to have.
+          required: true
+          schema:
+            type: integer
+        - name: job
+          in: query
+          description: The job to look for.
+          required: true
+          schema:
+            type: string
+        - name: pagesize
+          in: query
+          description: The maximum number of items in the response.
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A JSON object with the results of the request.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: '#/components/schemas/User'
+      
 components:
   schemas:
     User:

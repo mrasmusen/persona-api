@@ -41,6 +41,7 @@ class MongoDataStore(FakeProfilesDataStore):
 
     def get_single_user(self, username):
         query_result = PersonaUser.objects(username=username)
+        print(type(query_result))
         return build_json_from_query(query_result)
 
     def get_all_users(self, start_index, page_size):
@@ -57,6 +58,67 @@ class MongoDataStore(FakeProfilesDataStore):
     def add_single_user(self, data):
         # Don't even bother doing any error checking.
         PersonaUser(**data).save()
+
+    def get_complex_request(self, num_websites=0, job="", pagesize=5):
+        agg_query = [
+            {
+                '$project': {
+                    'username': True,
+                    'name': True,
+                    'ssn': True,
+                    'job': True,
+                    'current_location': True,
+                    'website': True,
+                    'websiteNumCmp': {
+                        '$gte': [
+                            {
+                                '$size': '$website'
+                            }, num_websites
+                        ]
+                    }
+                }
+            }, {
+                '$match': {
+                    'job': job,
+                    'websiteNumCmp': True
+                }
+            }, {
+                '$redact': {
+                    '$cond': {
+                        'if': {
+                            '$gt': [
+                                {'$strLenCP': '$name'}, 15
+                            ]
+                        },
+                        'then': '$$KEEP',
+                        'else': '$$PRUNE'
+                    }
+                }
+            }, {
+                '$sort': {
+                    'ssn': -1
+                }
+            }, {
+                '$project': {
+                    'websiteNumCmp': False,
+                    'job': False
+                }
+            }, {
+                '$unwind': '$website'
+            }
+        ]
+
+        if pagesize > 0:
+            agg_query.insert(3, {
+                '$limit': pagesize
+            })
+
+        query_result = PersonaUser.objects.aggregate(*agg_query)
+        res_json = []
+        for item in query_result:
+            item.pop("_id", None)
+            res_json.append(item)
+        return res_json
 
     def add_data_from_json_file(self, jsonfile):
         pass
