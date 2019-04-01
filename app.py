@@ -17,7 +17,7 @@ import pathlib
 # App will use the DATABASE_TYPE environment variable to know
 # which DataStore adapter to use. Will default to using a
 # dummy datastore.
-db_type = os.getenv("DATABASE_TYPE", "dummy")
+db_type = os.getenv("PERSONA_DATABASE_TYPE", "dummy")
 
 # Dictionary mapping environment variable data to datastore
 # implementations.

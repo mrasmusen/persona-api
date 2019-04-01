@@ -6,7 +6,15 @@ import json
 import os
 import traceback
 
-from mongoengine import connect, Document, StringField, ListField, FloatField
+from mongoengine import (
+    connect,
+    Document,
+    StringField,
+    ListField,
+    FloatField
+)
+
+from bson import ObjectId
 
 from datastore.fp_datastore import (
     FakeProfilesDataStore,
@@ -32,11 +40,12 @@ class MongoDataStore(FakeProfilesDataStore):
         self.db = connect(**self.db_conn_data)
 
     def get_single_user(self, username):
-        return PersonaUser.objects(username=username).to_json()
+        query_result = PersonaUser.objects(username=username)
+        return build_json_from_query(query_result)
 
     def get_all_users(self, start_index, page_size):
-        page_data = PersonaUser.objects()[start_index:start_index+page_size]
-        return page_data.to_json()
+        query_result = PersonaUser.objects()[start_index:start_index+page_size]
+        return build_json_from_query(query_result)
 
     def delete_single_user(self, username):
         retval = PersonaUser.objects(username=username).delete()
@@ -46,13 +55,21 @@ class MongoDataStore(FakeProfilesDataStore):
             raise ResourceNotFoundError
 
     def add_single_user(self, data):
-        pass
+        # Don't even bother doing any error checking.
+        PersonaUser(**data).save()
 
     def add_data_from_json_file(self, jsonfile):
         pass
         # with open(jsonfile) as f:s
         #   for item in json.loads(f.read()):
         #     PersonaUser(**item).save()
+
+
+def build_json_from_query(query_result):
+    query_dict = json.loads(query_result.to_json())
+    for item in query_dict:
+        item.pop("_id", None)
+    return query_dict
 
 
 class PersonaUser(Document):

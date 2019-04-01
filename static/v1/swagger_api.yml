@@ -51,6 +51,8 @@ paths:
   /users/{username}:
     get:
       summary: Get the details for a given user.
+      produces:
+        - application/json
       tags:
         - Users
       operationId: getSingleUser
@@ -67,7 +69,6 @@ paths:
           content:
             application/json:
               schema:
-                type: object
                 $ref: '#/components/schemas/User'
     delete:
       summary: Deletes a user wih a given username.
